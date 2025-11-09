@@ -4,11 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -17,6 +19,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.appiotcompose.screens.HomeScreen
 import com.example.appiotcompose.screens.LoginScreen
 import com.example.appiotcompose.screens.RegisterScreen
@@ -38,7 +44,7 @@ fun AppNavGraph() {
 
     NavHost(navController = nav, startDestination = "splash") {
         composable("splash") {
-            SplashScreen {
+            SplashLottie {
                 nav.navigate(Route.Login.path) {
                     popUpTo("splash") { inclusive = true }
                 }
@@ -50,26 +56,52 @@ fun AppNavGraph() {
     }
 }
 
+
 @Composable
-fun SplashScreen(onFinish: () -> Unit) {
-    // Composable minimal (logo centrado y fondo de marca)
-    LaunchedEffect(Unit) {
-        // Seguridad extra: si por alguna razón ya no mantiene el Splash nativo,
-        // forzamos un fallback de 200-400ms para transicionar suave:
-        kotlinx.coroutines.delay(250L)
-        onFinish()
+fun SplashLottie(onFinish: () -> Unit) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_lottie))
+    val animState = animateLottieCompositionAsState(
+        composition = composition,
+        iterations = 2
+    )
+    LaunchedEffect(animState.isAtEnd && !animState.isPlaying) {
+        if (animState.isAtEnd) onFinish()
     }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primary)
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.logo_d), // o Image con painterResource
-            contentDescription = null,
-            modifier = Modifier
-                .size(128.dp)
-                .align(Alignment.Center)
+        LottieAnimation(
+            composition = composition,
+            progress = { animState.progress },
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 }
+
+
+
+//@Composable
+//fun SplashScreen(onFinish: () -> Unit) {
+//    // Composable minimal (logo centrado y fondo de marca)
+//    LaunchedEffect(Unit) {
+//        // Seguridad extra: si por alguna razón ya no mantiene el Splash nativo,
+//        // forzamos un fallback de 200-400ms para transicionar suave:
+//        kotlinx.coroutines.delay(250L)
+//        onFinish()
+//    }
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(MaterialTheme.colorScheme.primary)
+//    ) {
+//        Icon(
+//            painter = painterResource(id = R.drawable.logo_d), // o Image con painterResource
+//            contentDescription = null,
+//            modifier = Modifier
+//                .size(128.dp)
+//                .align(Alignment.Center)
+//        )
+//    }
+//}
