@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,20 +13,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.appiotcompose.nav.Route
 import com.example.appiotcompose.ui.theme.AppIotComposeTheme
 import com.example.appiotcompose.R
+import com.example.appiotcompose.screens.login.AuthViewModel
+import com.example.appiotcompose.screens.login.LoginUiState
 
 @Composable
 fun LoginContent(
-    user: String,
+    email: String,
     pass: String,
-    onUserChange: (String) -> Unit,
+    uiState: LoginUiState,
+    onEmailChange: (String) -> Unit,
     onPassChange: (String) -> Unit,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit
@@ -54,20 +60,34 @@ fun LoginContent(
 
 
         Spacer(Modifier.height(12.dp))
-        OutlinedTextField(user,
-            onUserChange,
-            label = { Text("Usuario") },
+        OutlinedTextField( email,
+            onEmailChange,
+            label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
+
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(pass,
             onPassChange,
-            label = { Text("Contraseña") }
+            label = { Text("Contraseña") }, singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation()
         )
+
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onLoginClick, modifier = Modifier.fillMaxWidth()) {
-            Text("Ingresar")
+
+        Button(
+            onClick = { onLoginClick },
+            enabled = uiState !is LoginUiState.Loading,
+            modifier = Modifier.fillMaxWidth()
+        ) { Text(if (uiState is LoginUiState.Loading) "Ingresando..." else "Ingresar") }
+
+        if (uiState is LoginUiState.Error) {
+            Spacer(Modifier.height(8.dp))
+            Text((uiState as LoginUiState.Error).message, color = MaterialTheme.colorScheme.error)
         }
+
         TextButton(onClick = onRegisterClick, modifier = Modifier.align(Alignment.End)) {
             Text("¿No tienes cuenta? Regístrate")
         }
@@ -75,13 +95,15 @@ fun LoginContent(
 }
 
 @Composable
-fun LoginScreen(nav: NavController) {
-    var user by remember { mutableStateOf("") }
+fun LoginScreen(nav: NavController, vm: AuthViewModel = viewModel()) {
+    var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
+    val uiState by vm.ui.collectAsState()
+
 
     LoginContent(
-        user, pass,
-        onUserChange = { user = it },
+        email, pass, uiState,
+        onEmailChange = {  email = it },
         onPassChange = { pass = it },
         onLoginClick = { nav.navigate(Route.Home.path) },
         onRegisterClick = { nav.navigate(Route.Register.path) }
@@ -93,9 +115,10 @@ fun LoginScreen(nav: NavController) {
 fun LoginContentPreview() {
     AppIotComposeTheme {
         LoginContent(
-            user = "javier@demo.cl",
+            email = "javier@demo.cl",
             pass = "123456",
-            onUserChange = {},
+            uiState = LoginUiState.Idle,
+            onEmailChange = {},
             onPassChange = {},
             onLoginClick = {},
             onRegisterClick = {}

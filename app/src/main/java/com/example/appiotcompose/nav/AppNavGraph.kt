@@ -10,11 +10,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -27,6 +31,10 @@ import com.example.appiotcompose.screens.HomeScreen
 import com.example.appiotcompose.screens.LoginScreen
 import com.example.appiotcompose.screens.RegisterScreen
 import com.example.appiotcompose.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 //@Composable
 //fun AppNavGraph() {
@@ -38,13 +46,27 @@ import com.example.appiotcompose.R
 //    }
 //}
 
+class AppStartViewModel : ViewModel() {
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    init {
+        viewModelScope.launch {
+            // 👇 Simula API 1.5 s
+            delay(3500L)
+            _isLoading.value = false
+        }
+    }
+}
+
 @Composable
-fun AppNavGraph() {
+fun AppNavGraph(vm: AppStartViewModel = viewModel()) {
     val nav = rememberNavController()
+    val isLoading by vm.isLoading.collectAsState()
 
     NavHost(navController = nav, startDestination = "splash") {
         composable("splash") {
-            SplashLottie {
+            SplashLottie(isLoading = isLoading) {
                 nav.navigate(Route.Login.path) {
                     popUpTo("splash") { inclusive = true }
                 }
@@ -58,50 +80,28 @@ fun AppNavGraph() {
 
 
 @Composable
-fun SplashLottie(onFinish: () -> Unit) {
+fun SplashLottie(
+    isLoading: Boolean,
+    onFinish: () -> Unit
+) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_lottie))
-    val animState = animateLottieCompositionAsState(
-        composition = composition,
-        iterations = 2
-    )
-    LaunchedEffect(animState.isAtEnd && !animState.isPlaying) {
-        if (animState.isAtEnd) onFinish()
+    val animState = animateLottieCompositionAsState(composition, iterations = Int.MAX_VALUE)
+
+    // Navega cuando termine la "carga"
+    LaunchedEffect(isLoading) {
+        if (!isLoading) onFinish()
     }
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary),
+        contentAlignment = Alignment.Center
     ) {
-        LottieAnimation(
-            composition = composition,
-            progress = { animState.progress },
-            modifier = Modifier.align(Alignment.Center)
-        )
+        if (composition == null) {
+            CircularProgressIndicator()
+        } else {
+            LottieAnimation(composition, { animState.progress }, Modifier.size(220.dp))
+        }
     }
 }
 
 
-
-//@Composable
-//fun SplashScreen(onFinish: () -> Unit) {
-//    // Composable minimal (logo centrado y fondo de marca)
-//    LaunchedEffect(Unit) {
-//        // Seguridad extra: si por alguna razón ya no mantiene el Splash nativo,
-//        // forzamos un fallback de 200-400ms para transicionar suave:
-//        kotlinx.coroutines.delay(250L)
-//        onFinish()
-//    }
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(MaterialTheme.colorScheme.primary)
-//    ) {
-//        Icon(
-//            painter = painterResource(id = R.drawable.logo_d), // o Image con painterResource
-//            contentDescription = null,
-//            modifier = Modifier
-//                .size(128.dp)
-//                .align(Alignment.Center)
-//        )
-//    }
-//}
