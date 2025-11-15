@@ -10,7 +10,6 @@ import com.example.appiotcompose.data.remote.dto.UserDto
 
 
 // data/AuthRepository.kt
-
 class AuthRepository(
     private val api: AuthApi = HttpClient.authApi
 ) {

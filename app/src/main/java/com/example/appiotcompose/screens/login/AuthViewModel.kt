@@ -12,16 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-sealed class LoginUiState {
-    object Idle : LoginUiState()
-    object Loading : LoginUiState()
-    data class Error(val message: String) : LoginUiState()
-    data class Success(
-        val user: UserDto,
-        val token: String
-    ) : LoginUiState()
-}
-
+// screens/login/AuthViewModel.kt
 sealed class AuthState {
     data object Checking : AuthState()         // Splash chequeando
     data object Unauthenticated : AuthState()  // Ir a Login
@@ -29,8 +20,6 @@ sealed class AuthState {
     data class Error(val message: String) : AuthState()
 }
 
-
-// ui/auth/AuthViewModel.kt
 class AuthViewModel(
     application: Application
 ) : AndroidViewModel(application) {

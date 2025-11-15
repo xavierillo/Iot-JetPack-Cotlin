@@ -1,5 +1,5 @@
 package com.example.appiotcompose.data.remote.dto
-
+//data/remote/dto/AuthDto.kt
 data class LoginRequest(
     val email: String,
     val password: String

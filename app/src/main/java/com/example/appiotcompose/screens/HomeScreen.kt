@@ -16,16 +16,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appiotcompose.data.remote.dto.UserDto
 import com.example.appiotcompose.screens.login.AuthState
 import com.example.appiotcompose.screens.login.AuthViewModel
 import com.example.appiotcompose.ui.theme.AppIotComposeTheme
-
+//screens/HomeScreen.kt
 @Composable
 fun LoginContent(
     authState: AuthState,
@@ -38,7 +36,6 @@ fun LoginContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Bienvenido a la pantalla Home", style = MaterialTheme.typography.headlineSmall)
         // Mostrar datos del usuario si están disponibles
         if (authState is AuthState.Authenticated) {
             val user = (authState as AuthState.Authenticated).user
@@ -54,9 +51,6 @@ fun LoginContent(
         }
     }
 }
-
-
-
 @Composable
 fun HomeScreen(
     vm: AuthViewModel = viewModel(),

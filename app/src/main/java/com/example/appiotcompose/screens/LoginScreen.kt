@@ -24,7 +24,6 @@ import com.example.appiotcompose.ui.theme.AppIotComposeTheme
 import com.example.appiotcompose.R
 import com.example.appiotcompose.screens.login.AuthState
 import com.example.appiotcompose.screens.login.AuthViewModel
-import com.example.appiotcompose.screens.login.LoginUiState
 
 @Composable
 fun LoginContent(
