@@ -6,6 +6,7 @@ import com.example.appiotcompose.data.remote.AuthApi
 import com.example.appiotcompose.data.remote.HttpClient
 import com.example.appiotcompose.data.remote.dto.LoginRequest
 import com.example.appiotcompose.data.remote.dto.LoginResponse
+import com.example.appiotcompose.data.remote.dto.RegisterRequest
 import com.example.appiotcompose.data.remote.dto.UserDto
 
 
@@ -54,6 +55,21 @@ class AuthRepository(
 
             Result.success(user)
 
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun register(name: String, email: String, password: String): Result<String> {
+        return try {
+            val body = RegisterRequest(name, email, password)
+            val response = api.register(body)
+
+            if (!response.success) {
+                return Result.failure(Exception(response.message))
+            }
+
+            Result.success(response.message)
         } catch (e: Exception) {
             Result.failure(e)
         }

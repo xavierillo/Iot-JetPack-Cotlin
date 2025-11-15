@@ -3,6 +3,8 @@ package com.example.appiotcompose.data.remote
 
 import com.example.appiotcompose.data.remote.dto.LoginRequest
 import com.example.appiotcompose.data.remote.dto.LoginResponse
+import com.example.appiotcompose.data.remote.dto.RegisterRequest
+import com.example.appiotcompose.data.remote.dto.RegisterResponse
 import com.example.appiotcompose.data.remote.dto.UserDto
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -18,4 +20,7 @@ interface AuthApi {
     suspend fun profile(
         @Header("Authorization") auth: String
     ): UserDto
+
+    @POST("auth/register")
+    suspend fun register(@Body body: RegisterRequest): RegisterResponse
 }
