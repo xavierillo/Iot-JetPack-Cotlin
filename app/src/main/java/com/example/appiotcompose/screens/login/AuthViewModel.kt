@@ -2,9 +2,11 @@ package com.example.appiotcompose.screens.login
 
 // screens/login/AuthViewModel.kt
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appiotcompose.data.AuthRepository
+import com.example.appiotcompose.data.local.TokenStorage
 import com.example.appiotcompose.data.remote.dto.UserDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,23 +16,73 @@ sealed class LoginUiState {
     object Idle : LoginUiState()
     object Loading : LoginUiState()
     data class Error(val message: String) : LoginUiState()
-    data class Success(val user: UserDto) : LoginUiState()
+    data class Success(
+        val user: UserDto,
+        val token: String
+    ) : LoginUiState()
 }
 
-class AuthViewModel(app: Application) : AndroidViewModel(app) {
-    private val repo = AuthRepository()
-    private val _ui = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
-    val ui: StateFlow<LoginUiState> = _ui
+sealed class AuthState {
+    data object Checking : AuthState()         // Splash chequeando
+    data object Unauthenticated : AuthState()  // Ir a Login
+    data class Authenticated(val user: UserDto) : AuthState() // Ir a Home
+    data class Error(val message: String) : AuthState()
+}
 
-    fun login(email: String, password: String) {
-        _ui.value = LoginUiState.Loading
+
+// ui/auth/AuthViewModel.kt
+class AuthViewModel(
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val repo = AuthRepository()
+
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Checking)
+    val authState: StateFlow<AuthState> = _authState
+
+    init {
+        checkSession()
+    }
+
+    private fun appContext() = getApplication<Application>().applicationContext
+
+    fun checkSession() {
         viewModelScope.launch {
-            val ctx = getApplication<Application>().applicationContext
-            val res = repo.login(ctx, email, password)
-            _ui.value = res.fold(
-                onSuccess = { LoginUiState.Success(it) },
-                onFailure = { LoginUiState.Error(it.message ?: "Error de login") }
+            val ctx = appContext()
+            // 1) Ver si hay token guardado
+            val token = repo.getStoredToken(ctx)
+            if (token.isNullOrEmpty()) {
+                _authState.value = AuthState.Unauthenticated
+                return@launch
+            }
+
+            // 2) Validar token contra /profile
+            val res = repo.validateToken(ctx)
+            _authState.value = res.fold(
+                onSuccess = { user -> AuthState.Authenticated(user) },
+                onFailure = { AuthState.Unauthenticated }
             )
+        }
+    }
+
+    fun login(email: String, pass: String) {
+        _authState.value = AuthState.Checking
+        viewModelScope.launch {
+            val ctx = appContext()
+            val res = repo.login(ctx, email, pass)
+            _authState.value = res.fold(
+                onSuccess = { AuthState.Authenticated(it.user) },
+                onFailure = {
+                    AuthState.Error(it.message ?: "Error al iniciar sesión")
+                }
+            )
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            TokenStorage.clearToken(appContext())
+            _authState.value = AuthState.Unauthenticated
         }
     }
 }

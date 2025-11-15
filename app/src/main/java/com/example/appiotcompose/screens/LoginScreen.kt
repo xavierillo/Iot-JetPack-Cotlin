@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.appiotcompose.nav.Route
 import com.example.appiotcompose.ui.theme.AppIotComposeTheme
 import com.example.appiotcompose.R
+import com.example.appiotcompose.screens.login.AuthState
 import com.example.appiotcompose.screens.login.AuthViewModel
 import com.example.appiotcompose.screens.login.LoginUiState
 
@@ -30,12 +30,15 @@ import com.example.appiotcompose.screens.login.LoginUiState
 fun LoginContent(
     email: String,
     pass: String,
-    uiState: LoginUiState,
+    authState: AuthState,
     onEmailChange: (String) -> Unit,
     onPassChange: (String) -> Unit,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit
 ) {
+    val isLoading = authState is AuthState.Checking
+    val errorMessage = (authState as? AuthState.Error)?.message
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,14 +81,16 @@ fun LoginContent(
         Spacer(Modifier.height(16.dp))
 
         Button(
-            onClick = { onLoginClick },
-            enabled = uiState !is LoginUiState.Loading,
+            onClick = onLoginClick,
+            enabled = !isLoading,
             modifier = Modifier.fillMaxWidth()
-        ) { Text(if (uiState is LoginUiState.Loading) "Ingresando..." else "Ingresar") }
+        ) {
+            Text(if (isLoading) "Ingresando..." else "Ingresar")
+        }
 
-        if (uiState is LoginUiState.Error) {
+        if (errorMessage != null) {
             Spacer(Modifier.height(8.dp))
-            Text((uiState as LoginUiState.Error).message, color = MaterialTheme.colorScheme.error)
+            Text(errorMessage, color = MaterialTheme.colorScheme.error)
         }
 
         TextButton(onClick = onRegisterClick, modifier = Modifier.align(Alignment.End)) {
@@ -98,14 +103,23 @@ fun LoginContent(
 fun LoginScreen(nav: NavController, vm: AuthViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
-    val uiState by vm.ui.collectAsState()
+    val authState by vm.authState.collectAsState()
 
+    // Si AuthState cambió a Authenticated → navega
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Authenticated) {
+            nav.navigate(Route.Home.path) {
+                popUpTo(Route.Login.path) { inclusive = true }
+            }
+        }
+    }
 
     LoginContent(
-        email, pass, uiState,
-        onEmailChange = {  email = it },
+        email, pass,
+        authState = authState,
+        onEmailChange = { email = it },
         onPassChange = { pass = it },
-        onLoginClick = { nav.navigate(Route.Home.path) },
+        onLoginClick = { vm.login(email.trim(), pass) },
         onRegisterClick = { nav.navigate(Route.Register.path) }
     )
 }
@@ -117,7 +131,7 @@ fun LoginContentPreview() {
         LoginContent(
             email = "javier@demo.cl",
             pass = "123456",
-            uiState = LoginUiState.Idle,
+            authState = AuthState.Unauthenticated,
             onEmailChange = {},
             onPassChange = {},
             onLoginClick = {},

@@ -71,16 +71,12 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     // Convertidor JSON (usa Moshi o Gson, aquí Moshi)
     implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
-
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     // OkHttp logging (ver requests/responses en Logcat)
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
-
     implementation("androidx.datastore:datastore-preferences:1.1.7")
-
-
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
