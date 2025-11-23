@@ -28,8 +28,9 @@ object HttpClient {
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(okHttp)
-        .addConverterFactory(MoshiConverterFactory.create(moshi)) // 👈 usar este moshi
+        .addConverterFactory(MoshiConverterFactory.create(moshi)) // usar este moshi
         .build()
 
     val authApi: AuthApi = retrofit.create(AuthApi::class.java)
+    val sensorApi: SensorApi = retrofit.create(SensorApi::class.java)
 }
