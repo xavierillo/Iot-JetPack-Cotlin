@@ -38,7 +38,8 @@ import com.example.appiotcompose.ui.theme.AppIotComposeTheme
 fun LoginContent(
     authState: AuthState,
     sensorState: SensorUiState,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onLedClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -120,6 +121,17 @@ fun LoginContent(
                 style = MaterialTheme.typography.bodySmall
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { onLedClick() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            Text("Controlar LEDs IoT")
+        }
+
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -137,7 +149,8 @@ fun LoginContent(
 fun HomeScreen(
     vm: AuthViewModel = viewModel(),
     sensorVm: SensorViewModel = viewModel(),
-    onLogoutDone: () -> Unit
+    onLogoutDone: () -> Unit,
+    onLedClick: () -> Unit
 ) {
     val authState by vm.authState.collectAsState()
     val sensorState = sensorVm.uiState.value  // uiState es mutableStateOf en el ViewModel
@@ -152,19 +165,22 @@ fun HomeScreen(
     LoginContent(
         authState = authState,
         sensorState = sensorState,
-        onLogout = { vm.logout() }
+        onLogout = { vm.logout() },
+        onLedClick = onLedClick
     )
 }
 @Composable
 fun HomeContentPreviewUI(
     authState: AuthState,
     sensorState: SensorUiState,
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onLedClick: () -> Unit = {}
 ) {
     LoginContent(
         authState = authState,
         sensorState = sensorState,
-        onLogout = onLogout
+        onLogout = onLogout,
+        onLedClick = onLedClick
     )
 }
 
@@ -186,7 +202,9 @@ fun HomeScreenPreview() {
                 humidity = 60f,
                 lastUpdate = "2025-11-22 18:30",
                 errorMessage = null
-            )
+            ),
+            onLogout = {},
+            onLedClick = {}
         )
     }
 }

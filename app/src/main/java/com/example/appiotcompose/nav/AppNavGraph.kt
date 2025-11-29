@@ -27,6 +27,7 @@ import com.example.appiotcompose.screens.HomeScreen
 import com.example.appiotcompose.screens.LoginScreen
 import com.example.appiotcompose.screens.RegisterScreen
 import com.example.appiotcompose.R
+import com.example.appiotcompose.screens.led.LedControlScreen
 import com.example.appiotcompose.screens.login.AuthState
 import com.example.appiotcompose.screens.login.AuthViewModel
 import kotlinx.coroutines.delay
@@ -91,6 +92,9 @@ fun AppNavGraph(vm: AuthViewModel = viewModel()) {
                     nav.navigate(Route.Login.path) {
                         popUpTo(Route.Home.path) { inclusive = true }
                     }
+                },
+                onLedClick = {
+                    nav.navigate(Route.LedControl.path)
                 }
             )
         }
@@ -98,6 +102,11 @@ fun AppNavGraph(vm: AuthViewModel = viewModel()) {
         composable(Route.Register.path) {
             RegisterScreen(nav)
         }
+
+        composable(Route.LedControl.path) {
+            LedControlScreen()
+        }
+
     }
 }
 

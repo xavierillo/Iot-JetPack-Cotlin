@@ -24,7 +24,6 @@ object HttpClient {
     private val okHttp: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(logger)
         .build()
-
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(okHttp)
@@ -33,4 +32,5 @@ object HttpClient {
 
     val authApi: AuthApi = retrofit.create(AuthApi::class.java)
     val sensorApi: SensorApi = retrofit.create(SensorApi::class.java)
+    val ledApi: LedApi = retrofit.create(LedApi::class.java)
 }
