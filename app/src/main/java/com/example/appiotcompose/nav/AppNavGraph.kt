@@ -4,14 +4,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,26 +45,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-//@Composable
-//fun AppNavGraph() {
-//    val nav = rememberNavController()
-//    NavHost(navController = nav, startDestination = Route.Login.path) {
-//        composable(Route.Login.path)    { LoginScreen(nav) }
-//        composable(Route.Register.path) { RegisterScreen(nav) }
-//        composable(Route.Home.path)     { HomeScreen() }
-//    }
-//}
-
 @Composable
 fun AppNavGraph(vm: AuthViewModel = viewModel()) {
     val nav = rememberNavController()
     val authState by vm.authState.collectAsState()
 
     NavHost(navController = nav, startDestination = "splash") {
-
         composable("splash") {
-
-            // 👇 AQUÍ reaccionamos a los cambios de authState
+            // AQUÍ reaccionamos a los cambios de authState
             LaunchedEffect(authState) {
                 when (authState) {
                     AuthState.Checking -> {
@@ -133,5 +131,40 @@ fun SplashLottie() {
                 modifier = Modifier.size(220.dp)
             )
         }
+    }
+}
+
+@Composable
+fun NavigationBarUser(
+    currentRoute: String,
+    onNavigate: (String) -> Unit
+) {
+    NavigationBar(
+        containerColor = Color.White
+    ) {
+        NavigationBarItem(
+            selected = currentRoute == "home", // Adjust route logic as needed
+            onClick = { onNavigate("home") },
+            icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
+            label = { Text("Inicio") }
+        )
+        NavigationBarItem(
+            selected = currentRoute == "users",
+            onClick = { onNavigate("users") },
+            icon = { Icon(Icons.Default.Person, contentDescription = "Usuarios") },
+            label = { Text("Usuarios") }
+        )
+        NavigationBarItem(
+            selected = currentRoute == "keychains",
+            onClick = { onNavigate("keychains") },
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Llaveros") },
+            label = { Text("Llaveros") }
+        )
+        NavigationBarItem(
+            selected = currentRoute == "profile",
+            onClick = { onNavigate("profile") },
+            icon = { Icon(Icons.Outlined.Person, contentDescription = "Perfil") },
+            label = { Text("Perfil") }
+        )
     }
 }
