@@ -39,7 +39,7 @@ import com.example.appiotcompose.screens.login.AuthState
 import com.example.appiotcompose.ui.theme.AppIotComposeTheme
 
 @Composable
-fun HomeAdminScreen(
+fun HomeAdmin3Screen(
     authState: AuthState,
     onLogout: () -> Unit = {},
     onNavigate: (String) -> Unit
@@ -197,9 +197,11 @@ fun AdminMenuOption(
 @Composable
 fun HomeAdminScreenPreview() {
     AppIotComposeTheme {
-        HomeAdminScreen(
+        HomeAdmin3Screen(
             authState = AuthState.Unauthenticated, // Placeholder
             onNavigate = {}
         )
     }
 }
+
+

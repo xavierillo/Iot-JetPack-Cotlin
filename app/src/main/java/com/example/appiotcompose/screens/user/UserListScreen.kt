@@ -220,7 +220,8 @@ fun UserListScreenPreview() {
                 user = UserDto(
                     id = 1,
                     name = "Javier Ahumada",
-                    email = "javier@example.com"
+                    email = "javier@example.com",
+                    role = "admin"
                 )
             ),
             sensorState = SensorUiState(

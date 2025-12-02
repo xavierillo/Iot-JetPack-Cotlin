@@ -48,7 +48,7 @@ import com.example.appiotcompose.ui.theme.AppIotComposeTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeUserContent(
+fun HomeUser2Content(
     authState: AuthState,
     sensorState: SensorUiState,
     onLogout: () -> Unit,
@@ -273,7 +273,7 @@ fun HomeUserContentPreviewUI(
     onLedClick: () -> Unit = {},
     onNavigate: (String) -> Unit = {}
 ) {
-    HomeUserContent(
+    HomeUser2Content(
         authState = authState,
         sensorState = sensorState,
         onLogout = onLogout,
@@ -291,7 +291,8 @@ fun HomeUserScreenPreview() {
                 user = UserDto(
                     id = 1,
                     name = "Javier Ahumada",
-                    email = "javier@example.com"
+                    email = "javier@example.com",
+                    role = "admin"
                 )
             ),
             sensorState = SensorUiState(
