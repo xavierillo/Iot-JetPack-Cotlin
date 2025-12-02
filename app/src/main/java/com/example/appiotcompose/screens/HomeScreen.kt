@@ -35,7 +35,7 @@ import com.example.appiotcompose.screens.login.AuthViewModel
 import com.example.appiotcompose.ui.theme.AppIotComposeTheme
 //screens/HomeScreen.kt
 @Composable
-fun LoginContent(
+fun HomeContent(
     authState: AuthState,
     sensorState: SensorUiState,
     onLogout: () -> Unit,
@@ -162,7 +162,7 @@ fun HomeScreen(
         }
     }
 
-    LoginContent(
+    HomeContent(
         authState = authState,
         sensorState = sensorState,
         onLogout = { vm.logout() },
@@ -176,7 +176,7 @@ fun HomeContentPreviewUI(
     onLogout: () -> Unit = {},
     onLedClick: () -> Unit = {}
 ) {
-    LoginContent(
+    HomeContent(
         authState = authState,
         sensorState = sensorState,
         onLogout = onLogout,
@@ -193,7 +193,8 @@ fun HomeScreenPreview() {
                 user = UserDto(
                     id = 1,
                     name = "Javier Ahumada",
-                    email = "javier@example.com"
+                    email = "javier@example.com",
+                    role = "admin"
                 )
             ),
             sensorState = SensorUiState(

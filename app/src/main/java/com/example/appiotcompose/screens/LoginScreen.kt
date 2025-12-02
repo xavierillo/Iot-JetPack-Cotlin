@@ -104,7 +104,7 @@ fun LoginScreen(nav: NavController, vm: AuthViewModel = viewModel()) {
     var pass by remember { mutableStateOf("") }
     val authState by vm.authState.collectAsState()
 
-    // Si AuthState cambió a Authenticated → navega
+    //Si AuthState cambió a Authenticated → navega
     LaunchedEffect(authState) {
         if (authState is AuthState.Authenticated) {
             nav.navigate(Route.Home.path) {
@@ -112,6 +112,35 @@ fun LoginScreen(nav: NavController, vm: AuthViewModel = viewModel()) {
             }
         }
     }
+
+//    // Reaccionar a cambios de estado de autenticación
+//    LaunchedEffect(authState) {
+//        when (val state = authState) {
+//            is AuthState.Authenticated -> {
+//                val role = state.user.role.lowercase()
+//
+//                val destination = when (role) {
+//                    "admin" -> Route.HomeAdmin.path
+//                    "user"  -> Route.HomeUser.path
+//                    else    -> Route.HomeUser.path // fallback
+//                }
+//
+//                nav.navigate(destination) {
+//                    // Sacar Login del back stack
+//                    popUpTo(Route.Login.path) { inclusive = true }
+//                }
+//            }
+//            AuthState.Unauthenticated -> {
+//                // Nos quedamos en Login, sin navegación
+//            }
+//            AuthState.Checking -> {
+//                // Podrías mostrar un loading en la UI de Login
+//            }
+//            is AuthState.Error -> {
+//                // La UI de LoginContent puede mostrar el mensaje
+//            }
+//        }
+//    }
 
     LoginContent(
         email, pass,
