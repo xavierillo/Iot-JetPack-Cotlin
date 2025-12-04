@@ -51,8 +51,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appiotcompose.data.remote.dto.UserDto
 import com.example.appiotcompose.nav.NavigationBarUser
 import com.example.appiotcompose.screens.home.AdminMenuOption
-import com.example.appiotcompose.screens.home.HomeAdmin3Screen
-import com.example.appiotcompose.screens.home.QuickAccessItem
 import com.example.appiotcompose.screens.home.SensorUiState
 import com.example.appiotcompose.screens.home.SensorViewModel
 import com.example.appiotcompose.screens.home.getHumidityIcon
@@ -127,7 +125,7 @@ fun HomeScreenPreview() {
                     id = 1,
                     name = "Javier Ahumada",
                     email = "javier@example.com",
-                    role = "user"
+                    role = "admin"
                 )
             ),
             sensorState = SensorUiState(
@@ -256,15 +254,60 @@ fun HomeContent(
 
 
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeAdminScreen(
     authState: AuthState,
     onLogout: () -> Unit = {},
     onNavigate: (String) -> Unit
 ) {
+    val userName = (authState as? AuthState.Authenticated)?.user?.name?.split(" ")?.firstOrNull() ?: "Usuario"
+
     Scaffold(
-        containerColor = Color(0xFFFDFBF7) // Creamy background
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color.LightGray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person, // Placeholder for Admin avatar
+                                contentDescription = "Admin Avatar",
+                                tint = Color(0xFF5C93FF), // Blueish tint
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Text(
+                            text = "Hola, $userName", // Wave emoji
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
+            )
+        },
+        bottomBar = {
+            NavigationBarUser(
+                currentRoute = "home",
+                onNavigate = onNavigate
+            )
+        },
+        containerColor = Color(0xFFF8F9FA) // Creamy background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -275,39 +318,6 @@ fun HomeAdminScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Avatar
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFE0E0E0)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person, // Placeholder for Admin avatar
-                        contentDescription = "Admin Avatar",
-                        tint = Color(0xFF5C93FF), // Blueish tint
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Hola, Admin \uD83D\uDC4B", // Wave emoji
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
             // System Status Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -316,15 +326,39 @@ fun HomeAdminScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF2E9EEA)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CarCrash,
+                            contentDescription = "Avatar",
+                            tint = Color.White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Estado del sistema",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "Conectado a IoT",
                         fontSize = 16.sp,
@@ -529,7 +563,7 @@ fun HomeUserContent(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceAround,
             ) {
                 QuickAccessItem(
                     icon = Icons.Default.VpnKey,
@@ -541,24 +575,42 @@ fun HomeUserContent(
                     label = "Historial",
                     onClick = { /* TODO */ }
                 )
-                QuickAccessItem(
-                    icon = Icons.Default.Person,
-                    label = "Mi perfil",
-                    onClick = { onNavigate("profile") }
-                )
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Footer Logo
-            Text(
-                text = "iotech",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QuickAccessItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEEECE6)),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.size(100.dp) // Square-ish
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = Color.Black,
+                modifier = Modifier.size(32.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
         }
     }
 }

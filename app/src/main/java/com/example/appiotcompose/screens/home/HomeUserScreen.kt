@@ -198,17 +198,17 @@ fun HomeUser2Content(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                QuickAccessItem(
+                QuickAccessItem2(
                     icon = Icons.Default.VpnKey,
                     label = "Mis llaveros",
                     onClick = { onNavigate("keychains") }
                 )
-                QuickAccessItem(
+                QuickAccessItem2(
                     icon = Icons.Default.AccessTime,
                     label = "Historial",
                     onClick = { /* TODO */ }
                 )
-                QuickAccessItem(
+                QuickAccessItem2(
                     icon = Icons.Default.Person,
                     label = "Mi perfil",
                     onClick = { onNavigate("profile") }
@@ -232,7 +232,7 @@ fun HomeUser2Content(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuickAccessItem(
+fun QuickAccessItem2(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     onClick: () -> Unit
@@ -244,7 +244,7 @@ fun QuickAccessItem(
         modifier = Modifier.size(100.dp) // Square-ish
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(5.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
