@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CarCrash
+import androidx.compose.material.icons.filled.Output
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.outlined.Description
@@ -29,6 +30,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -81,7 +83,8 @@ fun HomeScreen(
         authState = authState,
         sensorState = sensorState,
         onLogout = { vm.logout() },
-        onLedClick = onLedClick
+        onLedClick = onLedClick,
+        onNavigate = {}
     )
 }
 @Composable
@@ -91,28 +94,36 @@ fun HomeContentPreviewUI(
     onLogout: () -> Unit = {},
     onLedClick: () -> Unit = {}
 ) {
-    when (val state = authState) {
-        is AuthState.Authenticated -> {
-            if (state.user.role == "admin") {
-                HomeAdminScreen(
-                        authState = authState, // Placeholder
-                        onNavigate = {}
-                    )
-            } else {
-                HomeUserContent(
-                    authState = authState,
-                    sensorState = sensorState,
-                    onLogout = onLogout,
-                    onLedClick = onLedClick,
-                    onNavigate = {  }
-                )
-            }
-        }
+//    when (val state = authState) {
+//        is AuthState.Authenticated -> {
+//            if (state.user.role == "admin") {
+//                HomeAdminScreen(
+//                        authState = authState, // Placeholder
+//                        onNavigate = {}
+//                    )
+//            } else {
+//                HomeUserContent(
+//                    authState = authState,
+//                    sensorState = sensorState,
+//                    onLogout = onLogout,
+//                    onLedClick = onLedClick,
+//                    onNavigate = {  }
+//                )
+//            }
+//        }
+//
+//        AuthState.Checking -> TODO()
+//        is AuthState.Error -> TODO()
+//        AuthState.Unauthenticated -> TODO()
+//    }
 
-        AuthState.Checking -> TODO()
-        is AuthState.Error -> TODO()
-        AuthState.Unauthenticated -> TODO()
-    }
+    HomeUserAdminContent(
+        authState = authState,
+        sensorState = sensorState,
+        onLogout = onLogout,
+        onLedClick = onLedClick,
+        onNavigate = {  }
+    )
 }
 
 @Preview(showBackground = true)
@@ -141,12 +152,168 @@ fun HomeScreenPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeUserAdminContent(
+    authState: AuthState,
+    sensorState: SensorUiState,
+    onLogout: () -> Unit,
+    onLedClick: () -> Unit,
+    onNavigate: (String) -> Unit
+) {
+    val userName = (authState as? AuthState.Authenticated)?.user?.name?.split(" ")?.firstOrNull() ?: "Usuario"
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        )
+                        {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.LightGray),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Admin Avatar",
+                                    tint = Color(0xFFFFFFFF),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "Hola, $userName",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+                        IconButton(
+                            onClick = onLogout
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Output,
+                                contentDescription = "Salir",
+                                tint = Color.Black,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
+            )
+        },
+        bottomBar = {
+            NavigationBarUser(
+                currentRoute = "home",
+                onNavigate = onNavigate
+            )
+        },
+        containerColor = Color(0xFFE5E5E5) // Creamy background
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding) // <--- ESTO ES LO QUE FALTABA
+        ) {
+            //Spacer(modifier = Modifier.height(16.dp))
+            // IoT Status Card
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFEBF4FA)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF2E9EEA)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CarCrash,
+                            contentDescription = "Avatar",
+                            tint = Color.White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Estado del sistema",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+
+                if (authState is AuthState.Authenticated) {
+                    val user = authState.user
+                    Text(
+                        text = "Bienvenido ${user.name}",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Spacer(Modifier.height(20.dp))
+                }
+
+
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Llaveros vinculados: 3",
+                        fontSize = 16.sp,
+                        color = Color(0xFF3B77E1),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Última acción: Entrada 18:40 hrs, 14 dic ",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+
+            }
+
+            // Aquí podrías llamar a tu HomeContent real si quisieras:
+            // HomeContent(...)
+        }
+    }
+}
+
+
+
 @Composable
 fun HomeContent(
     authState: AuthState,
     sensorState: SensorUiState,
     onLogout: () -> Unit,
-    onLedClick: () -> Unit
+    onLedClick: () -> Unit,
+    onNavigate: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
