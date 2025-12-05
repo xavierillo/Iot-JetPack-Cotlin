@@ -94,29 +94,6 @@ fun HomeContentPreviewUI(
     onLogout: () -> Unit = {},
     onLedClick: () -> Unit = {}
 ) {
-//    when (val state = authState) {
-//        is AuthState.Authenticated -> {
-//            if (state.user.role == "admin") {
-//                HomeAdminScreen(
-//                        authState = authState, // Placeholder
-//                        onNavigate = {}
-//                    )
-//            } else {
-//                HomeUserContent(
-//                    authState = authState,
-//                    sensorState = sensorState,
-//                    onLogout = onLogout,
-//                    onLedClick = onLedClick,
-//                    onNavigate = {  }
-//                )
-//            }
-//        }
-//
-//        AuthState.Checking -> TODO()
-//        is AuthState.Error -> TODO()
-//        AuthState.Unauthenticated -> TODO()
-//    }
-
     HomeUserAdminContent(
         authState = authState,
         sensorState = sensorState,
@@ -129,6 +106,32 @@ fun HomeContentPreviewUI(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
+    AppIotComposeTheme {
+        HomeContentPreviewUI(
+            authState = AuthState.Authenticated(
+                user = UserDto(
+                    id = 1,
+                    name = "Javier Ahumada",
+                    email = "javier@example.com",
+                    role = "user"
+                )
+            ),
+            sensorState = SensorUiState(
+                isLoading = false,
+                temperature = 24.5f,
+                humidity = 60f,
+                lastUpdate = "2025-11-22 18:30",
+                errorMessage = null
+            ),
+            onLogout = {},
+            onLedClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview2() {
     AppIotComposeTheme {
         HomeContentPreviewUI(
             authState = AuthState.Authenticated(
@@ -223,17 +226,19 @@ fun HomeUserAdminContent(
                 onNavigate = onNavigate
             )
         },
-        containerColor = Color(0xFFE5E5E5) // Creamy background
+        containerColor = Color(0xFFF8F9FA) // Fondo gris claro
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // <--- ESTO ES LO QUE FALTABA
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             //Spacer(modifier = Modifier.height(16.dp))
             // IoT Status Card
             Card(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFEBF4FA)),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -269,43 +274,108 @@ fun HomeUserAdminContent(
                 }
 
                 if (authState is AuthState.Authenticated) {
-                    val user = authState.user
-                    Text(
-                        text = "Bienvenido ${user.name}",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    Spacer(Modifier.height(20.dp))
+                    val user = (authState as AuthState.Authenticated).user
+                    if (user.role == "admin") {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Conectado a IoT",
+                                fontSize = 16.sp,
+                                color = Color(0xFF4CAF50), // Green for status
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "3 usuarios registrados",
+                                fontSize = 16.sp,
+                                color = Color.DarkGray
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "5 llaveros activos",
+                                fontSize = 16.sp,
+                                color = Color.DarkGray
+                            )
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Llaveros vinculados: 3",
+                                fontSize = 16.sp,
+                                color = Color(0xFF3B77E1),
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Última acción: Entrada 18:40 hrs, 14 dic ",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+            if (authState is AuthState.Authenticated) {
+                val user = (authState as AuthState.Authenticated).user
+                if (user.role == "user") {
+                    // Control Button
+                    Button(
+                        onClick = onLedClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B77E1)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "Controlar Puerta",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
 
-
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Llaveros vinculados: 3",
-                        fontSize = 16.sp,
-                        color = Color(0xFF3B77E1),
-                        fontWeight = FontWeight.Medium
+                // Quick Access Section
+                Text(
+                    text = "Accesos rápidos",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Start).padding(bottom = 8.dp, top = 8.dp),
+                    color = Color.Black
+                )
+                if (user.role == "admin") {
+                    // Menu Options
+                    AdminMenuOption(
+                        icon = Icons.Outlined.Person,
+                        label = "Gestión de Usuarios",
+                        onClick = { onNavigate("users_management") }
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Última acción: Entrada 18:40 hrs, 14 dic ",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-
+                AdminMenuOption(
+                    icon = Icons.Outlined.VpnKey,
+                    label = if (user.role == "admin") "Gestión de Llaveros" else "Llaveros",
+                    onClick = { onNavigate("keychains_management") }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                AdminMenuOption(
+                    icon = Icons.Outlined.Description,
+                    label = "Historial de accesos",
+                    onClick = { onNavigate("access_history") }
+                )
             }
 
-            // Aquí podrías llamar a tu HomeContent real si quisieras:
-            // HomeContent(...)
+
         }
     }
 }
-
-
 
 @Composable
 fun HomeContent(
@@ -415,369 +485,6 @@ fun HomeContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cerrar sesión")
-        }
-    }
-}
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeAdminScreen(
-    authState: AuthState,
-    onLogout: () -> Unit = {},
-    onNavigate: (String) -> Unit
-) {
-    val userName = (authState as? AuthState.Authenticated)?.user?.name?.split(" ")?.firstOrNull() ?: "Usuario"
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color.LightGray),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person, // Placeholder for Admin avatar
-                                contentDescription = "Admin Avatar",
-                                tint = Color(0xFF5C93FF), // Blueish tint
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Text(
-                            text = "Hola, $userName", // Wave emoji
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        },
-        bottomBar = {
-            NavigationBarUser(
-                currentRoute = "home",
-                onNavigate = onNavigate
-            )
-        },
-        containerColor = Color(0xFFF8F9FA) // Creamy background
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // System Status Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF2E9EEA)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CarCrash,
-                            contentDescription = "Avatar",
-                            tint = Color.White,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Estado del sistema",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                }
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Conectado a IoT",
-                        fontSize = 16.sp,
-                        color = Color(0xFF4CAF50), // Green for status
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "3 usuarios registrados",
-                        fontSize = 16.sp,
-                        color = Color.DarkGray
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "5 llaveros activos",
-                        fontSize = 16.sp,
-                        color = Color.DarkGray
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Menu Options
-            AdminMenuOption(
-                icon = Icons.Outlined.Person,
-                label = "Gestión de Usuarios",
-                onClick = { onNavigate("users_management") }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            AdminMenuOption(
-                icon = Icons.Outlined.VpnKey,
-                label = "Gestión de Llaveros",
-                onClick = { onNavigate("keychains_management") }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            AdminMenuOption(
-                icon = Icons.Outlined.Description,
-                label = "Historial de accesos",
-                onClick = { onNavigate("access_history") }
-            )
-        }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeUserContent(
-    authState: AuthState,
-    sensorState: SensorUiState,
-    onLogout: () -> Unit,
-    onLedClick: () -> Unit,
-    onNavigate: (String) -> Unit
-) {
-    val userName = (authState as? AuthState.Authenticated)?.user?.name?.split(" ")?.firstOrNull() ?: "Usuario"
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color.LightGray),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Avatar",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Text(
-                            text = "Hola, $userName", // Wave emoji
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        },
-        bottomBar = {
-            NavigationBarUser(
-                currentRoute = "home",
-                onNavigate = onNavigate
-            )
-        },
-        containerColor = Color(0xFFF8F9FA) // Creamy background
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            // IoT Status Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFEBF4FA)),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF2E9EEA)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CarCrash,
-                            contentDescription = "Avatar",
-                            tint = Color.White,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Estado del sistema",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Llaveros vinculados: 3",
-                        fontSize = 16.sp,
-                        color = Color(0xFF3B77E1),
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Última acción: Entrada 18:40 hrs, 14 dic ",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Control Button
-            Button(
-                onClick = onLedClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B77E1)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Controlar Puerta",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Quick Access Section
-            Text(
-                text = "Accesos rápidos",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Start),
-                color = Color.Black
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-            ) {
-                QuickAccessItem(
-                    icon = Icons.Default.VpnKey,
-                    label = "Mis llaveros",
-                    onClick = { onNavigate("keychains") }
-                )
-                QuickAccessItem(
-                    icon = Icons.Default.AccessTime,
-                    label = "Historial",
-                    onClick = { /* TODO */ }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun QuickAccessItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    onClick: () -> Unit
-) {
-    Card(
-        onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEEECE6)),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.size(100.dp) // Square-ish
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = Color.Black,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = label,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black
-            )
         }
     }
 }
